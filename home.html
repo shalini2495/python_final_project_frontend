@@ -1,0 +1,109 @@
+<div class="content">
+    <marquee class="currencies-marquee" id="currencies-marquee" behavior="scroll" direction="left">
+    </marquee>
+</div>
+<div class="select-countried">
+    <select name="countries" id="countries">
+
+        <option value="INR">INR</option>
+        <option value="USD">USD</option>
+        <option value="EUR">EUR</option>
+        <option value="JPY">JPY</option>
+
+    </select>
+</div>
+<div class="chart-container">
+    <div id="chart_div"></div>
+</div>
+<button onclick="saveToPDF()">click me</button>
+<script>
+
+    var currencyData = [
+        {
+
+            currency: "USD",
+            symbol: "$",
+            value: 1
+
+        },
+        {
+
+            currency: "INR",
+            symbol: "Rupee",
+            value: 10
+
+        },
+        {
+
+            currency: "CAD",
+            symbol: "$",
+            value: 100
+
+        },
+        {
+
+            currency: "EUR",
+            symbol: "Y",
+            value: 90
+
+        }
+    ]
+    for (let index = 0; index < currencyData.length; index++) {
+        let countrySpan = $("<span class=\"country\"<\/span>");
+        countrySpan.html(currencyData[index].currency + ": ")
+        let valueSpan = $("<span class=\"value\"<\/span>");
+        valueSpan.html(currencyData[index].value)
+        let currencyFlagSpan = $(`<span class="currency-flag currency-flag-${currencyData[index].currency.toLowerCase()}"></span>`)
+        let currencyDiv = $("<div class=\"currency\" ></div>").append(currencyFlagSpan).append(countrySpan).append(valueSpan);
+        $("#currencies-marquee").append(currencyDiv);
+    }
+
+
+
+
+
+    google.charts.load('current', { packages: ['corechart', 'bar'] });
+    google.charts.setOnLoadCallback(drawBasic);
+
+    function drawBasic() {
+
+        var data = google.visualization.arrayToDataTable([
+            ['Currency', 'Value',],
+            ...currencyData.reduce(function (acc, key) {
+                acc.push([key.currency, key.value]);
+                return acc;
+            }, [])
+        ]);
+
+        var options = {
+            title: 'Currency of world',
+            chartArea: { width: '50%' },
+            hAxis: {
+                title: 'Value',
+                minValue: 0
+            },
+            vAxis: {
+                title: 'Currency'
+            }
+        };
+
+        var chart = new google.visualization.BarChart(document.getElementById('chart_div'));
+
+        chart.draw(data, options);
+    }
+
+    async function saveToPDF() {
+        const element = $(".chart-container")[0];
+        console.log(element);
+        const opt = {
+            margin: 1,
+            filename: "currency-chart.pdf",
+            image: { type: "jpeg", quality: 1 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: "in", format: "letter", orientation: "portrait" },
+        };
+
+        await html2pdf().set(opt).from(element).save();
+    }
+
+</script>
